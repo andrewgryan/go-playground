@@ -14,16 +14,13 @@ func main() {
 		fmt.Println("Too few arguments")
 		return
 	}
-	chunkSize := 100 * 1024 * 1024
+	chunkSize := 100 * 1024 * 1024 // 100mb
 	for _, fileName := range os.Args[1:] {
 		// File size
-		file, err := os.Open(fileName)
+		fileSize, err := getFileSize(fileName)
 		if err != nil {
 			log.Fatal(err)
 		}
-		info, _ := file.Stat()
-		fileSize := int(info.Size())
-		file.Close()
 
 		// Read 100mb chunk into fileName.part
 		fmt.Printf("splitting: %s\n", fileName)
@@ -34,6 +31,19 @@ func main() {
 			log.Fatal(err)
 		}
 	}
+}
+
+func getFileSize(fileName string) (int, error) {
+	file, err := os.Open(fileName)
+	if err != nil {
+		return 0, err
+	}
+	defer file.Close()
+	info, err := file.Stat()
+	if err != nil {
+		return 0, err
+	}
+	return int(info.Size()), nil
 }
 
 func join(fileName string, fileSize, chunkSize int) error {
