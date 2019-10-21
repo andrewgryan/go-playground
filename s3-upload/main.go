@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 )
@@ -25,8 +26,16 @@ func main() {
 		if err != nil {
 			fmt.Printf("pre-signed URL generation failed: %s\n", fileName)
 		}
-		fmt.Println(signed)
+		err = fileUpload(fileName, signed.url, signed.fields)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
+}
+
+func fileUpload(fileName string, url string, params map[string]string) error {
+	fmt.Printf("upload: %s to %s\n", fileName, url)
+	return nil
 }
 
 func presignedURL(endpoint, fileName string) (SignedURL, error) {
