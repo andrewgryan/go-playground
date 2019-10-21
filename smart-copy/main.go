@@ -14,6 +14,7 @@ import (
 var endpoint string
 
 func main() {
+	// Example supporting -user flag
 	user := flag.String("user", "default", "user name")
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "usage: %s [options] [FILE [FILE ...]]\n", os.Args[0])
@@ -30,19 +31,21 @@ func main() {
 	for _, fileName := range args {
 		fmt.Println(fileName)
 
-		// Copy file from fileName to fileName.copy
+		// Read fileName
 		reader, err := os.Open(fileName)
 		if err != nil {
 			log.Fatal(err)
 		}
 		defer reader.Close()
 
+		// File size in bytes
 		info, err := reader.Stat()
 		if err != nil {
 			log.Fatal(err)
 		}
 		fileSize64 := info.Size()
 
+		// Write fileName.copy
 		writer, err := os.Create(fileName + ".copy")
 		if err != nil {
 			log.Fatal(err)
@@ -52,7 +55,10 @@ func main() {
 		// Play with progress bar
 		bar := pb.Full.Start(int(fileSize64))
 		barReader := bar.NewProxyReader(reader)
+
+		// Copy file from fileName to fileName.copy
 		io.Copy(writer, barReader)
+
 		bar.Finish()
 	}
 }
