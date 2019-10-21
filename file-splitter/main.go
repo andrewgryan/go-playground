@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"math"
@@ -9,13 +10,18 @@ import (
 )
 
 func main() {
-	if len(os.Args) < 2 {
+	chunkMB := flag.Int("chunk", 100, "chunk size in megabytes")
+	flag.Parse()
+	args := flag.Args() // remaining arguments
+	if len(args) < 1 {
 		fmt.Printf("Usage: %s [FILE [FILE ...]]\n", os.Args[0])
 		fmt.Println("Too few arguments")
 		return
 	}
-	chunkSize := 100 * 1024 * 1024 // 100mb
-	for _, fileName := range os.Args[1:] {
+	chunkSize := *chunkMB * 1024 * 1024
+	fmt.Printf("Chunk size (megabytes): %d\n", chunkMB)
+	fmt.Printf("Chunk size (bytes): %d\n", chunkSize)
+	for _, fileName := range args {
 		// File size
 		fileSize, err := getFileSize(fileName)
 		if err != nil {
