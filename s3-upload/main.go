@@ -1,10 +1,13 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
+	"mime/multipart"
 	"net/http"
 	"os"
 )
@@ -35,6 +38,52 @@ func main() {
 
 func fileUpload(fileName string, url string, params map[string]string) error {
 	fmt.Printf("upload: %s to %s\n", fileName, url)
+
+	// Read/write buffer to store file content
+	rw := &bytes.Buffer{}
+
+	// Multipart Writer
+	writer := multipart.NewWriter(rw)
+
+	// Add pre-signed form-fields
+	for k, v := range params {
+		writer.WriteField(k, v)
+	}
+
+	// Add file form-field at the end (AWS peculiarity)
+	part, err := writer.CreateFormFile("file", fileName)
+	if err != nil {
+		return err
+	}
+
+	// Open file
+	file, err := os.Open(fileName)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	// Copy file using multipart.Writer
+	if _, err = io.Copy(part, file); err != nil {
+		return err
+	}
+	writer.Close()
+
+	// POST request and Println response (consider refactor)
+	response, err := http.Post(url, writer.FormDataContentType(), rw)
+	if err != nil {
+		return err
+	} else {
+		body := &bytes.Buffer{}
+		_, err := body.ReadFrom(response.Body)
+		if err != nil {
+			return err
+		}
+		response.Body.Close()
+		fmt.Println(response.StatusCode)
+		fmt.Println(response.Header)
+		fmt.Println(body)
+	}
 	return nil
 }
 
