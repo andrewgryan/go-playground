@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	chunkMB := flag.Int("chunk", 100, "chunk size in megabytes")
+	chunk := flag.Int("chunk", 100, "chunk size in megabytes")
 	flag.Parse()
 	args := flag.Args() // remaining arguments
 	if len(args) < 1 {
@@ -18,8 +18,8 @@ func main() {
 		fmt.Println("Too few arguments")
 		return
 	}
-	chunkSize := *chunkMB * 1024 * 1024
-	fmt.Printf("Chunk size (megabytes): %d\n", chunkMB)
+	chunkSize := *chunk * 1024 * 1024
+	fmt.Printf("Chunk size (megabytes): %d\n", chunk)
 	fmt.Printf("Chunk size (bytes): %d\n", chunkSize)
 	for _, fileName := range args {
 		// File size
