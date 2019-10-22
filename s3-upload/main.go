@@ -29,6 +29,7 @@ func main() {
 		return
 	}
 	for _, fileName := range os.Args[2:] {
+		fmt.Printf("pre-sign URL: %s\n", fileName)
 		signed, err := presignedURL(endpoint, fileName)
 		if err != nil {
 			fmt.Printf("pre-signed URL generation failed: %s\n", fileName)
@@ -96,6 +97,11 @@ func fileUpload(fileName string, url string, params map[string]string) error {
 			return err
 		}
 		response.Body.Close()
+		if true {
+			fmt.Println(response.StatusCode)
+			fmt.Println(response.Header)
+			fmt.Println(body)
+		}
 	}
 	return nil
 }
