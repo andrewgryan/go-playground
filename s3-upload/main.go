@@ -93,9 +93,6 @@ func fileUpload(fileName string, url string, params map[string]string) error {
 			return err
 		}
 		response.Body.Close()
-		fmt.Println(response.StatusCode)
-		fmt.Println(response.Header)
-		fmt.Println(body)
 	}
 	return nil
 }
