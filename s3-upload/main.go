@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/cheggaaa/pb/v3"
 	"io"
 	"io/ioutil"
 	"log"
@@ -57,17 +58,29 @@ func fileUpload(fileName string, url string, params map[string]string) error {
 	}
 
 	// Open file
-	file, err := os.Open(fileName)
+	reader, err := os.Open(fileName)
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer reader.Close()
+
+	// File size in bytes
+	info, err := reader.Stat()
+	if err != nil {
+		log.Fatal(err)
+	}
+	fileSize64 := info.Size()
+
+	// Progress bar
+	bar := pb.Full.Start(int(fileSize64))
+	barReader := bar.NewProxyReader(reader)
 
 	// Copy file using multipart.Writer
-	if _, err = io.Copy(part, file); err != nil {
+	if _, err = io.Copy(part, barReader); err != nil {
 		return err
 	}
 	writer.Close()
+	bar.Finish()
 
 	// POST request and Println response (consider refactor)
 	response, err := http.Post(url, writer.FormDataContentType(), rw)
