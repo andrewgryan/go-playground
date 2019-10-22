@@ -18,13 +18,16 @@ type SignedURL struct {
 	fields map[string]string
 }
 
+// Compile-time variable hidden from end-user
+// use go build -ldflags "-X main.endpoint=$ENDPOINT"
+var endpoint string
+
 func main() {
-	if len(os.Args) < 3 {
-		fmt.Printf("Usage: %s ENDPOINT [FILE [FILE ...]]\n", os.Args[0])
+	if len(os.Args) < 2 {
+		fmt.Printf("Usage: %s [FILE [FILE ...]]\n", os.Args[0])
 		fmt.Println("Too few arguments specified")
 		return
 	}
-	endpoint := os.Args[1]
 	for _, fileName := range os.Args[2:] {
 		signed, err := presignedURL(endpoint, fileName)
 		if err != nil {
