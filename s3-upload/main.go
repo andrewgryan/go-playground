@@ -70,7 +70,7 @@ func fileUpload(fileName string, url string, params map[string]string) error {
 	// File size in bytes
 	info, err := reader.Stat()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	fileSize64 := info.Size()
 
