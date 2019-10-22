@@ -28,7 +28,7 @@ func main() {
 		fmt.Println("Too few arguments specified")
 		return
 	}
-	for _, fileName := range os.Args[2:] {
+	for _, fileName := range os.Args[1:] {
 		fmt.Printf("pre-sign URL: %s\n", fileName)
 		signed, err := presignedURL(endpoint, fileName)
 		if err != nil {
