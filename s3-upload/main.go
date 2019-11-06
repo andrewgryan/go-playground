@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"github.com/cheggaaa/pb/v3"
 	"io"
@@ -22,13 +23,41 @@ type SignedURL struct {
 // use go build -ldflags "-X main.endpoint=$ENDPOINT"
 var endpoint string
 
+type Namespace struct {
+	apikey    string
+	fileNames []string
+}
+
+func parseArgs(argc []string) (Namespace, error) {
+	flagSet := flag.NewFlagSet(argc[0], flag.ContinueOnError)
+	apikey := flagSet.String("apikey", "", "AWS Lambda API key")
+	err := flagSet.Parse(argc[1:])
+	if err != nil {
+		return Namespace{}, err
+	}
+	return Namespace{*apikey, flagSet.Args()}, nil
+}
+
+func Usage() {
+	fmt.Printf("Usage: %s -apikey APIKEY FILE [FILE ...]]\n", os.Args[0])
+}
+
 func main() {
-	if len(os.Args) < 2 {
-		fmt.Printf("Usage: %s [FILE [FILE ...]]\n", os.Args[0])
+	args, err := parseArgs(os.Args)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if args.apikey == "" {
+		Usage()
+		fmt.Println("Please specify -apikey")
+		return
+	}
+	if len(args.fileNames) == 0 {
+		Usage()
 		fmt.Println("Too few arguments specified")
 		return
 	}
-	for _, fileName := range os.Args[1:] {
+	for _, fileName := range args.fileNames {
 		fmt.Printf("pre-sign URL: %s\n", fileName)
 		signed, err := presignedURL(endpoint, fileName)
 		if err != nil {
