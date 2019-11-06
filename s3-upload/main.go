@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"github.com/cheggaaa/pb/v3"
@@ -24,22 +25,25 @@ type SignedURL struct {
 var endpoint string
 
 type Namespace struct {
-	apikey    string
+	APIKey    string
 	fileNames []string
 }
 
 func parseArgs(argc []string) (Namespace, error) {
 	flagSet := flag.NewFlagSet(argc[0], flag.ContinueOnError)
-	apikey := flagSet.String("apikey", "", "AWS Lambda API key")
+	APIKey, ok := os.LookupEnv("FOREST_API_KEY")
+	if !ok {
+		return Namespace{}, errors.New("FOREST_API_KEY environment variable not set")
+	}
 	err := flagSet.Parse(argc[1:])
 	if err != nil {
 		return Namespace{}, err
 	}
-	return Namespace{*apikey, flagSet.Args()}, nil
+	return Namespace{APIKey, flagSet.Args()}, nil
 }
 
 func Usage() {
-	fmt.Printf("Usage: %s -apikey APIKEY FILE [FILE ...]]\n", os.Args[0])
+	fmt.Printf("Usage: %s FILE [FILE ...]]\n", os.Args[0])
 }
 
 func main() {
@@ -47,9 +51,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if args.apikey == "" {
+	if args.APIKey == "" {
 		Usage()
-		fmt.Println("Please specify -apikey")
+		fmt.Println("Please specify FOREST_API_KEY environment variable")
 		return
 	}
 	if len(args.fileNames) == 0 {
