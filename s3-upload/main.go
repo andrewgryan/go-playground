@@ -47,6 +47,10 @@ func Usage() {
 }
 
 func main() {
+	if endpoint == "" {
+		log.Println("REST endpoint not specified during compilation")
+		log.Fatalln("Contact an administrator")
+	}
 	args, err := parseArgs(os.Args)
 	if err != nil {
 		log.Fatal(err)
@@ -66,6 +70,7 @@ func main() {
 		signed, err := presignedURL(endpoint, fileName)
 		if err != nil {
 			fmt.Printf("pre-signed URL generation failed: %s\n", fileName)
+			log.Fatal(err)
 		}
 		err = fileUpload(fileName, signed.url, signed.fields)
 		if err != nil {
